@@ -1,0 +1,88 @@
+name: Setup debuginfo.dev
+description:
+  Install the dbginfo CLI and authenticate it to debuginfo.dev with GitHub OIDC
+author: Elide Technologies, Inc.
+
+branding:
+  icon: download-cloud
+  color: purple
+
+inputs:
+  install:
+    description: >-
+      Install dbginfo. Set to false to authenticate only when your build already
+      provides a verified CLI; version and path outputs are then unset.
+    required: false
+    default: 'true'
+  version:
+    description: dbginfo version to install, e.g. `0.1.0`, or `latest`
+    required: false
+    default: latest
+  url:
+    description: debuginfo.dev service base URL; exported as DEBUGINFO_DEV_URL
+    required: false
+    default: https://api.debuginfo.dev
+  org:
+    description:
+      Org slug. Required only when this repository is linked in more than one
+      org; otherwise the service resolves it.
+    required: false
+  project:
+    description:
+      Project slug. Optional; when set it must match the project this repository
+      is linked to.
+    required: false
+  scope:
+    description: Credential scope to request, `write` or `read`
+    required: false
+    default: write
+  authenticate:
+    description: >-
+      Exchange this job's GitHub OIDC token for a short-lived debuginfo.dev
+      credential. Needs `permissions: id-token: write`.
+    required: false
+    default: 'true'
+  audience:
+    description:
+      Audience of the requested GitHub ID token. Defaults to the origin of
+      `url`.
+    required: false
+  apikey:
+    description:
+      A debuginfo.dev API key to use instead of OIDC (e.g. from secrets). Takes
+      precedence over `authenticate`.
+    required: false
+  github-token:
+    description:
+      Token used to read dbginfo releases from GitHub. Only needed when the
+      releasing repository is private, or to avoid API rate limits.
+    required: false
+    default: ${{ github.token }}
+  repository:
+    description: Repository publishing dbginfo releases
+    required: false
+    default: elide-dev/debuginfo-client
+  github-api-url:
+    description: GitHub REST API base used to find releases
+    required: false
+    default: https://api.github.com
+
+outputs:
+  version:
+    description: The dbginfo version installed
+  path:
+    description: Full path of the dbginfo binary
+  authenticated:
+    description: '`true` when a credential was exported as DEBUGINFO_DEV_APIKEY'
+  org:
+    description: Org slug the OIDC credential belongs to
+  project:
+    description: Project slug the OIDC credential is restricted to
+  expires-at:
+    description: RFC 3339 expiry of the OIDC credential (15 minutes after issue)
+  credential-id:
+    description: ID of the debuginfo.dev credential the token was minted under
+
+runs:
+  using: node24
+  main: dist/index.js
